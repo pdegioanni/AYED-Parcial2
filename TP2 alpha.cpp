@@ -5,27 +5,14 @@
 #include <string.h>
 #include <fstream>
 #define TAMANIO 1000
+#define N 2
 
 using namespace std;
 string palabras[TAMANIO]; //aca se copian los valores leidos del txt 
 
-/*struct nodo
-{
-  string nombre;
-  int contador;
-  struct nodo *izq,*der,*padre; //hay q implementar para n links
-};
-
-void inserta(struct nodo*insercion,struct nodo*elemento);
-void imprime(struct nodo *p);
-void borra(struct nodo *p);*/
-
-
-
 //FUNCION LECTOR DE TEXTO
 
-void leerTxt()
-{
+void leerTxt(){
 	//string palabras[TAMANIO];//deberia ir en main creo
 	//string nombreArchivo="palabras.txt";
   ifstream archivo("palabras.txt");
@@ -39,29 +26,115 @@ void leerTxt()
     //return palabras[string];
 }
 
-//CLASE PILA reutilizada sobre un areglo
-
-template <class T> class Pila{
-
-		T d[TAMANIO]; 
-		int p; //Posicion de la cabeza de la pila
+//CLASE NODO
+//Clase secundaria para definir la lista
+template <class T> class Nodo { 
+	private:
+    	T dato;
+    	Nodo* next;
 	public:
-		Pila() {p = -1 ;};
-		T tope(void) { return d[p]; };
-		void desapilar(void) {if(!this -> pila_vacia()) --p;}; 
-		bool pila_vacia() {return p == -1;};
-		int tamanio(){return p;};
-		void vaciar_pila(){
-			while(!this -> pila_vacia()){
-				this -> desapilar();
-			}
+    //Constructores
+    	Nodo() { next = NULL; };
+    	Nodo(T a) { dato = a; next = NULL; };
+	//Setters
+    	void setDato(T a) { dato = a; };
+    	void setNext(Nodo* n) { next = n; };
+	//Getters
+    	T getDato() { return dato; };
+    	Nodo* getNext() { return next; };
+    	bool nodoVacio() { return next == NULL; }
+};
+
+//CLASE LISTA
+//Secundaria para crear cola y pila
+template <class T> class Lista {
+private: 
+	Nodo<T>* czo;
+public:
+    Lista() { czo = new Nodo<T>(); };
+    Lista(Nodo<T>* n) { czo = n; };
+    void agregar(T d);
+    bool listaVacia(void){ return czo -> nodoVacio();};
+    T cabeza(void);
+	T ultimo(void);
+    Lista* resto(void);
+    void borrar(void); //borra la cabeza
+    void borrarUltimo();//borra el ultimo
+    void imprimir();
+    //int size();// cantidad de nodos de la lista
+};
+
+template <class T> void Lista<T>::agregar(T d){
+    Nodo<T>* nuevo = new Nodo<T>(d); //crea un nuevo nodo para almacenar el dato
+    nuevo -> setNext(czo); // setea la dirección del nodo al último elemento que se había agregado a la lista
+    czo = nuevo; //setea el comienzo de la lista a la dirección del nodo nuevo
+}
+
+template <class T> T Lista<T>::cabeza(void){
+    if (listaVacia()) return NULL;
+    return czo->getDato();
+}
+
+template <class T> T Lista<T>::ultimo(void){
+	Lista<T>* aux = this;
+    if (listaVacia()) return NULL;
+	while(!((aux -> resto) ->listaVacia())){
+		aux = aux -> resto();
+	}
+    return aux -> cabeza -> getDato()();
+}
+
+template <class T> Lista<T>* Lista<T>::resto(void){
+    Lista* l = new Lista (czo->getNext()); //El czo de la lista actual tiene la dirección del segundo elemento
+    return (l);
+}
+
+template <class T> void Lista<T>::borrar(){
+	if(!this.listaVacia){
+		Nodo<T>* tmp = czo; 
+		czo = czo ->getNext(); //(borrado lógico)
+		delete tmp; //libera la memoria del nodo borrado (borrado físico)
+	}
+}
+
+template <class T> void Lista<T>::borrarUltimo(){
+	Nodo<T>* penultimo = czo;
+	Nodo<T>* ultimo = penultimo -> getNext();
+	if(!this -> listaVacia()){	
+		while(!ultimo ->nodoVacio()){
+			penultimo = ultimo;
+			ultimo = ultimo -> getNext();
 		}
-	
+		delete ultimo;
+		penultimo -> setNext(NULL);
+	}
+};
+
+template <class T> void Lista<T>::imprimir(){ 
+    Lista<T>* aux = this;
+    if (listaVacia()) cout<<"Vacio "<<endl;
+	while(!((aux -> resto())->listaVacia())){
+		cout << aux -> cabeza();
+		aux = aux -> resto();
+	}
+	cout<< aux -> cabeza() << "\n";
+}
+
+//CLASE COLA
+template <class T> class Cola :public Lista<T> {
+	public:
+	    Cola(void) { Lista<T>(); };
+	    void encolar(T a) { this->agregar(a); };
+	    void desencolar(void) { this->borrarUltimo(); };
+	    T primero() { return this->ultimo(); };
+	    T ultimo(void) { return this->cabeza(); };
+	    bool colaVacia(void) { return this->listaVacia(); };
+	    string imprimir(string s) { return this->imprimir(); };
 };
 
 //CLASE COLA reutilizada sobre un arreglo
 
-template <class T> class Cola{
+/*template <class T> class Cola{
 
 		T d[TAMANIO]; 
 		int p; //Posicion del primer elemento que ingresa a la cola (mas proximo a salir)
@@ -90,10 +163,95 @@ template <class T> class Cola{
 		T ultimo(void) {if(!this -> colavacia()) return d[u];};
 		bool colavacia() {return n == 0;};
 		
-	};
+	};*/
+	
+	
+//CLASE PILA
+template <class T> class Pila:public Lista<T>{
+	public:
+		Pila(){Lista<T>();};
+    	void apilar(T d){this->agregar(d);};
+    	T tope(void){return this->cabeza();};
+    	void desapilar(void){this->borrar();};
+    	bool pilaVacia(){return this->listaVacia();};
+};                  
 
 
+//CLASE PILA reutilizada sobre un areglo
 
+/*template <class T> class Pila{
+
+		T d[TAMANIO]; 
+		int p; //Posicion de la cabeza de la pila
+	public:
+		Pila() {p = -1 ;};
+		T tope(void) { return d[p]; };
+		void desapilar(void) {if(!this -> pila_vacia()) --p;}; 
+		bool pila_vacia() {return p == -1;};
+		int tamanio(){return p;};
+		void vaciar_pila(){
+			while(!this -> pila_vacia()){
+				this -> desapilar();
+			}
+		}
+	
+};*/
+
+//CLASE NODO PALABRA
+//es el tipo de nodo que va formando la heap
+typedef string Palabra;
+class NodoPal { 
+	private:
+    	Palabra palabra;
+    	NodoPal* padre;
+    	NodoPal* hijos[N];
+    	int repetidas;
+    	Cola<NodoPal*>* colaNodo; 
+	public:
+    //Constructores
+	    NodoPal(Palabra p) { 
+			palabra = p; 
+			padre = NULL; 
+			repetidas = 0;
+			colaNodo = new Cola<NodoPal*>();
+			for(int i=N; i>0; i--){
+				hijos[i] = NULL;
+				colaNodo -> encolar(hijos[i]);
+			}
+		};
+	//Setters
+	    //void set_dato(T a) { dato = a; };
+	    void setPadre(NodoPal* p) { padre = p; };
+	    void setHijo(NodoPal* h, int i) {
+			hijos[i] = h;
+			colaNodo -> desencolar();
+		};
+	    void aumentarRepetidas(){ repetidas ++;};
+	//Getters
+	    Palabra getPalabra() { return palabra; };
+	    int getRepetidas(){ return repetidas;}
+	    NodoPal* getPadre() { return padre; };
+	    NodoPal* getHijo(int i){return hijos[i];}
+	    bool tieneLugar() { return colaNodo -> colaVacia(); }
+};
+/*struct nodoPalabra{
+       palabra dato;
+       int contador; // 
+       nodoPalabra *padre;
+       nodoPalabra* hijos[TAMANIO];//se define un arreglo de nodos de 1000
+       int indice;//para ubicar nodo en la cola 
+};*/
+//typedef nodoPalabra * pnodo;
+/*struct nodo
+{
+  string nombre;
+  int contador;
+  struct nodo *izq,*der,*padre; //hay q implementar para n links
+};
+
+void inserta(struct nodo*insercion,struct nodo*elemento);
+void imprime(struct nodo *p);
+void borra(struct nodo *p);*/
 //DECLARACION DE FUNCIONES 
 
 void leerTxt();
@@ -191,7 +349,7 @@ void testImprimirPalabras()
 
 int preguntarN()
 {
-	  //solicita ingresar el numero de hijos y comprueba si la rta es correcta (chequear porque no funciona cuando no es un num)
+/*	  //solicita ingresar el numero de hijos y comprueba si la rta es correcta (chequear porque no funciona cuando no es un num)
  
   int n=-1;
   while(n<=0 ||n==NULL ||isdigit(n)){
@@ -199,23 +357,13 @@ int preguntarN()
 	cin >>n;
 	//if(!isdigit(n)){n=-1;}
   	}
-	return n;
+	return n;*/
 }
 
 
-//CLASE NODO
 
-typedef string palabra;
-struct nodoPalabra{
-       palabra dato;
-       int contador; // 
-       nodoPalabra *padre;
-       nodoPalabra* hijos[TAMANIO];//se define un arreglo de nodos de 1000
-       int indice;//para ubicar nodo en la cola
-       
-};
-typedef nodoPalabra * pnodo;
 class arbol{
+	/*
     pnodo raiz;
     void Insert(int x, bool &aumento, nodoPalabra* &A);
     void show(pnodo aux, int n);
@@ -226,12 +374,12 @@ public:
     arbol(){raiz=NULL;};
     ~arbol(){};
     void CreaArbol(palabra x);
-    void VerArbol(){ show(raiz,0); }
+    void VerArbol(){ show(raiz,0); }*/
 };
 
 void armarHeap(int n )
 {
- nodoPalabra *padre;
+ /*nodoPalabra *padre;
  nodoPalabra *hijos[n];
  
  
@@ -239,8 +387,8 @@ void armarHeap(int n )
  {
  nodoPalabra *nuevaPalabra = new (nodoPalabra);
  nuevaPalabra->dato=palabras[i];
- //if(false)
-  }
+ //if(false)*/
+  
   
  
  //crearCola(nodoPalabra *&padre *&hijos[])	
