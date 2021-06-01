@@ -48,9 +48,8 @@ public:
     Lista* resto(void);
     void borrar(void); //borra la cabeza
     void borrarUltimo();//borra el ultimo
-    void imprimirUltimo(){cout<< ultimo()<< endl;};
-    void imprimirLista();
-    //int size();// cantidad de nodos de la lista
+    void imprimirLista(int sentido);
+    void invertir(Lista* l1);
 };
 
 template <class T> void Lista<T>::agregar(T d){
@@ -99,9 +98,17 @@ template <class T> void Lista<T>::borrarUltimo(){
 	}
 };
 
-template <class T> void Lista<T>::imprimirLista(){ //Imprime la lista como pila (de ultimo a primero)
-	Lista<T>* aux = this;
-    if (listaVacia()) cout<<"Vacio "<<endl;
+template <class T> void Lista<T>::imprimirLista(int sentido){ 
+    Lista<T>* aux;
+	if (listaVacia()) cout<<"Vacio "<<endl;
+	else if(sentido == 0){ //Imprime la lista como pila (de ultimo a primero)
+		aux = this;
+	}
+	else if(sentido == 1){ //Imprime la lista como cola (de primero a ultimo)
+		aux = new Lista();
+		aux -> invertir(this);
+	}
+	else return;
 	while(!((aux -> resto())->listaVacia())){
 		cout << aux -> cabeza()<<endl;
 		aux = aux -> resto();
@@ -109,63 +116,26 @@ template <class T> void Lista<T>::imprimirLista(){ //Imprime la lista como pila 
 	cout<< aux -> cabeza() << "\n";
 }
 
+template <class T> void Lista<T>::invertir(Lista* l1){//
+	if(!l1->listaVacia()){
+		this -> agregar(l1->cabeza()); 
+		this -> invertir(l1 -> resto());
+	}
+}
 
 //CLASE COLA
 template <class T> class Cola :public Lista<T> {
 	public:
 	    Cola(void) { Lista<T>(); };
+	    Cola(Lista<T> lista){};
 	    void encolar(T a) { this->agregar(a); };
 	    void desencolar(void) { this->borrarUltimo(); };
-	    T primero() { return this->ultimo(); };
-	    T ultimo(void) { return this->cabeza(); };
+	    T prox() {return this-> ultimo(); };
+	    T ult() { return this->cabeza(); };
 	    bool colaVacia(void) { return this->listaVacia(); };
-	    void imprimirCola();
+	    void imprimirCola(){return this -> imprimirLista(1);};
 };
 
-template <class T> void Cola<T>::imprimirCola(){ //Imprime la lista como cola (de primero a ultimo)
-	Cola<T>* aux = this;
-    if (colaVacia()) cout<<"Cola vacia "<<endl;
-	while(!(aux->colaVacia())){
-		aux -> imprimirUltimo(); 
-		aux -> desencolar();
-	}
-	//cout << aux -> imprimirUltimo << "\n";
-}
-
-//CLASE COLA reutilizada sobre un arreglo
-
-/*template <class T> class Cola{
-
-		T d[TAMANIO]; 
-		int p; //Posicion del primer elemento que ingresa a la cola (mas proximo a salir)
-		int u; //Posicion del ultimo elemento que ingreso a la cola (ultimo en salir)
-		int n; // indica la cantidad de elementos que hay en la cola
-	public:
-		Cola() { p = 0 ; u = -1; n = 0;};
-		
-		void encolar(T x) {
-			if(n< TAMANIO){
-				n++; //Suma 1 a la cantidad de elementos
-				if(u==(TAMANIO-1)) u=-1; //Si es el final del arreglo, vuelve a cargar en el principio
-				d[++u] = x; //Agrega elemento a la derecha 
-			}
-			else cout<<"Error, no hay mas lugar en la cola"<<endl; 
-		}
-		void desencolar(void) {
-			if(!this -> colavacia()){  
-				n--; 
-				if(p == (TAMANIO-1)) p = -1; //Si llegua al final del arreglo, vuelve al principio
-				p++;  
-			}
-			else cout<<"Error, cola vacia"<< endl;
-		};
-		T primero(void) {if(!this -> colavacia()) return d[p];}; 
-		T ultimo(void) {if(!this -> colavacia()) return d[u];};
-		bool colavacia() {return n == 0;};
-		
-	};*/
-	
-	
 //CLASE PILA
 template <class T> class Pila:public Lista<T>{
 	public:
@@ -174,30 +144,8 @@ template <class T> class Pila:public Lista<T>{
     	T tope(void){return this->cabeza();};
     	void desapilar(void){this->borrar();};
     	bool pilaVacia(){return this->listaVacia();};
-    	void imprimirPila() { this -> imprimirLista(); };
+    	void imprimirPila() { this -> imprimirLista(0); };
 };                  
-
-
-//CLASE PILA reutilizada sobre un areglo
-
-/*template <class T> class Pila{
-
-		T d[TAMANIO]; 
-		int p; //Posicion de la cabeza de la pila
-	public:
-		Pila() {p = -1 ;};
-		T tope(void) { return d[p]; };
-		void desapilar(void) {if(!this -> pila_vacia()) --p;}; 
-		bool pila_vacia() {return p == -1;};
-		int tamanio(){return p;};
-		void vaciar_pila(){
-			while(!this -> pila_vacia()){
-				this -> desapilar();
-			}
-		}
-	
-};*/
-
 
 
 //void inserta(struct nodo*insercion,struct nodo*elemento);
@@ -208,7 +156,7 @@ template <class T> class Pila:public Lista<T>{
 Cola<string>* leerTxt();
 void preguntarN();
 void testImprimirPalabras();
-void armarHeap(int n );
+void armarHeap(string palabra);
 void ordenarHeap();
 void escribirHeapOrdenada();
 //void crearCola(nodoPalabra *&padre *&hijos[]);
@@ -217,8 +165,26 @@ void escribirHeapOrdenada();
 //CLASE PRINCIPAL
 int main(){
 	preguntarN();
-	Cola<string>* palabras = leerTxt(); //Carga el archivo y genera una cola con las palabras a ordenar
-
+	Cola<string>* colaPalabras = leerTxt(); //Carga el archivo y genera una cola con las palabras a ordenar
+	//cout<<"Palabras del archivo sin ordenar:\n" <<endl;
+	colaPalabras -> imprimirCola();
+	
+	/*cout<< "Primero "<< colaPalabras -> prox()<<endl<<endl;
+	cout<< "Ultimo "<< colaPalabras -> ult()<<endl;
+	colaPalabras -> imprimirCola();
+	
+	colaPalabras -> desencolar();
+	
+	cout<< "Primero "<< colaPalabras -> prox()<<endl;
+	cout<< "Ultimo "<< colaPalabras -> ult()<<endl;
+	colaPalabras -> desencolar();*/
+	
+	while(!(colaPalabras -> colaVacia())){
+		armarHeap(colaPalabras -> prox());
+		//cout << "Primero "<< colaPalabras -> proximo()<<endl;
+		colaPalabras -> desencolar();
+	}
+	
   	//struct nodo *raiz,*temp;
   	//raiz=NULL;
   	//int numeroDeHijos;
@@ -229,7 +195,6 @@ int main(){
 	
 	//cout<<"el numero de n sera:"<<N;
 	//testImprimirPalabras();
-	palabras -> imprimirCola();
 
   /*printf("Teclea nombres, seguido por un caracter no numerico\n");
   do{   
@@ -301,7 +266,7 @@ Cola<string>* leerTxt(){
   	
 	string linea;
 	ifstream archivo;
-	archivo.open("palabras.txt");
+	archivo.open("prueba.txt");
 	
 	if(!archivo){
 		cout<< "No se puede abrir el archivo"<<endl;
@@ -321,14 +286,13 @@ Cola<string>* leerTxt(){
 }
 
 
-void testImprimirPalabras()
-{
+/*void testImprimirPalabras(){
 	//palabras[1000]="vacio LPM";
 	for(int i=0;i<TAMANIO;i++)
 	{
 		//cout<<palabras[i]<<endl;
 	}
-}
+}*/
 
 void preguntarN(){
  //solicita ingresar el numero de hijos y comprueba si la rta es correcta (chequear porque no funciona cuando no es un num)
@@ -409,8 +373,9 @@ public:
     void VerArbol(){ show(raiz,0); }
 };*/
 
-void armarHeap(int n )
-{
+void armarHeap(string palabra ){
+
+	cout<< "Armando heap con palabra: "<< palabra << endl;
  /*nodoPalabra *padre;
  nodoPalabra *hijos[n];
  
