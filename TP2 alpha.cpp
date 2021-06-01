@@ -50,6 +50,7 @@ public:
     void borrarUltimo();//borra el ultimo
     void imprimirLista(int sentido);
     void invertir(Lista* l1);
+    void setDatoCabeza(T a){czo -> setDato(a);};
 };
 
 template <class T> void Lista<T>::agregar(T d){
@@ -126,7 +127,7 @@ template <class T> void Lista<T>::invertir(Lista* l1){//
 //CLASE COLA
 template <class T> class Cola :public Lista<T> {
 	public:
-	    Cola(void) { Lista<T>(); };
+	    Cola() { Lista<T>(); };
 	    Cola(Lista<T> lista){};
 	    void encolar(T a) { this->agregar(a); };
 	    void desencolar(void) { this->borrarUltimo(); };
@@ -161,23 +162,73 @@ void ordenarHeap();
 void escribirHeapOrdenada();
 //void crearCola(nodoPalabra *&padre *&hijos[]);
 
+//CLASE NODO PALABRA
+//es el tipo de nodo que va formando la heap
+
+class NodoPal { 
+	private:
+    	string palabra;
+    	NodoPal* padre;
+    	//NodoPal* hijos[];
+    	int repetidas;
+    	Lista<NodoPal*>* hijos;
+    	Cola<int>* colaNodo; 
+	public:
+    //Constructores
+	    NodoPal(string p) { 
+			palabra = p; 
+			padre = NULL; 
+			repetidas = 0;
+			hijos = new Lista<NodoPal*>(); //Los hijos se van agregando a la lista a medida que son conocidos
+			colaNodo = new Cola<int>();
+			for(int i=0; i<N; i++){
+				//hijos[i] = NULL;
+				//hijos ->agregar(NULL); 
+				//cout<<i<<endl;
+				colaNodo -> encolar(i); //Arma una cola con la cantidad de hijos "disponibles" para enlazar
+			}
+		};
+	//Setters
+	    //void set_dato(T a) { dato = a; };
+	    void setPadre(NodoPal* p) { padre = p; };
+	    void setHijo(NodoPal* h) {
+			hijos -> agregar(h);
+			colaNodo -> desencolar();
+		};
+	    void aumentarRepetidas(){ repetidas ++;};
+	//Getters
+	    string getPalabra() { return palabra; };
+	    int getRepetidas(){ return repetidas;}
+	    NodoPal* getPadre() { return padre; };
+	    //NodoPal* getHijo(int i){return hijos[i];}
+	    bool tieneLugar() { return !colaNodo -> colaVacia(); }
+};
+/*struct nodoPalabra{
+       palabra dato;
+       int contador; // 
+       nodoPalabra *padre;
+       nodoPalabra* hijos[TAMANIO];//se define un arreglo de nodos de 1000
+       int indice;//para ubicar nodo en la cola 
+};*/
+//typedef nodoPalabra * pnodo;
+/*struct nodo
+{
+  string nombre;
+  int contador;
+  struct nodo *izq,*der,*padre; //hay q implementar para n links
+};*/
 
 //CLASE PRINCIPAL
+
+Cola<NodoPal*>* heapIncompleto = new Cola<NodoPal*>();
+Cola<NodoPal*>* heapCompleto = new Cola<NodoPal*>();
+
+
 int main(){
 	preguntarN();
 	Cola<string>* colaPalabras = leerTxt(); //Carga el archivo y genera una cola con las palabras a ordenar
 	//cout<<"Palabras del archivo sin ordenar:\n" <<endl;
 	colaPalabras -> imprimirCola();
-	
-	/*cout<< "Primero "<< colaPalabras -> prox()<<endl<<endl;
-	cout<< "Ultimo "<< colaPalabras -> ult()<<endl;
-	colaPalabras -> imprimirCola();
-	
-	colaPalabras -> desencolar();
-	
-	cout<< "Primero "<< colaPalabras -> prox()<<endl;
-	cout<< "Ultimo "<< colaPalabras -> ult()<<endl;
-	colaPalabras -> desencolar();*/
 	
 	while(!(colaPalabras -> colaVacia())){
 		armarHeap(colaPalabras -> prox());
@@ -185,6 +236,15 @@ int main(){
 		colaPalabras -> desencolar();
 	}
 	
+	heapIncompleto -> desencolar();
+	while(!heapIncompleto -> colaVacia()){ //Si despues de agregar todas las palabras, quedaron nodos sin hijos asignados, se los agrega a heapCompleto para que queden todos los nodos en un solo heap
+		cout<< "Se agrega palabra sin hijos a heap completo: "<< heapIncompleto -> prox() -> getPalabra() <<endl;
+		heapCompleto -> encolar(heapIncompleto -> prox());
+		heapIncompleto -> desencolar();
+	}
+	
+	heapIncompleto -> imprimirCola(); //Debe quedar vacio
+	//heapCompleto -> imprimirCola();
   	//struct nodo *raiz,*temp;
   	//raiz=NULL;
   	//int numeroDeHijos;
@@ -306,57 +366,7 @@ void preguntarN(){
   	//cout <<"Se usara un monticulo de orden "<< N<<endl;
 	//return ;*/
 }
-//CLASE NODO PALABRA
-//es el tipo de nodo que va formando la heap
-
-class NodoPal { 
-	private:
-    	string palabra;
-    	NodoPal* padre;
-    	NodoPal* hijos[];
-    	int repetidas;
-    	Cola<NodoPal*>* colaNodo; 
-	public:
-    //Constructores
-	    NodoPal(string p) { 
-			palabra = p; 
-			padre = NULL; 
-			repetidas = 0;
-			colaNodo = new Cola<NodoPal*>();
-			for(int i=N; i>0; i--){
-				hijos[i] = NULL;
-				colaNodo -> encolar(hijos[i]);
-			}
-		};
-	//Setters
-	    //void set_dato(T a) { dato = a; };
-	    void setPadre(NodoPal* p) { padre = p; };
-	    void setHijo(NodoPal* h, int i) {
-			hijos[i] = h;
-			colaNodo -> desencolar();
-		};
-	    void aumentarRepetidas(){ repetidas ++;};
-	//Getters
-	    string getPalabra() { return palabra; };
-	    int getRepetidas(){ return repetidas;}
-	    NodoPal* getPadre() { return padre; };
-	    NodoPal* getHijo(int i){return hijos[i];}
-	    bool tieneLugar() { return colaNodo -> colaVacia(); }
-};
-/*struct nodoPalabra{
-       palabra dato;
-       int contador; // 
-       nodoPalabra *padre;
-       nodoPalabra* hijos[TAMANIO];//se define un arreglo de nodos de 1000
-       int indice;//para ubicar nodo en la cola 
-};*/
-//typedef nodoPalabra * pnodo;
-/*struct nodo
-{
-  string nombre;
-  int contador;
-  struct nodo *izq,*der,*padre; //hay q implementar para n links
-};
+/*
 
 class arbol{
 	/*
@@ -373,9 +383,40 @@ public:
     void VerArbol(){ show(raiz,0); }
 };*/
 
-void armarHeap(string palabra ){
 
-	cout<< "Armando heap con palabra: "<< palabra << endl;
+void armarHeap(string palabra ){
+	NodoPal* nuevoNodo = new NodoPal(palabra);
+	NodoPal* siguiente;
+	
+	//Se agrega el nodo a la estructura, vinculandolo al nodo padre que corresponda en orden
+	if(!heapIncompleto -> colaVacia()){ //Si no es el primer nodo
+		
+		siguiente = heapIncompleto -> prox(); //Se toma el siguiente nodo que todavia no tiene sus hijos seteados
+		
+		if(siguiente -> tieneLugar()){ //Si tiene lugar para agregar un hijo, se agrega nuevo nodo como hijo
+			nuevoNodo -> setPadre(siguiente);
+			siguiente -> setHijo(nuevoNodo);
+			cout<< "A la palabra hija "<< nuevoNodo -> getPalabra()<< " se la vincula con palabra padre "<< siguiente -> getPalabra()<<endl;	
+		}
+		else{ // Si siguiente no tiene mas lugar para agregar un hijo,
+			heapCompleto -> encolar(siguiente); // se agrega a la cola heapCompleto
+			heapIncompleto -> desencolar();  //Se elimina de la cola heapIncompleto  
+			siguiente = heapIncompleto -> prox(); // Se toma el siguiente en la cola y se agrega el nuevo nodo como hijo
+			nuevoNodo -> setPadre(siguiente);
+			siguiente -> setHijo(nuevoNodo);
+			cout<< "A la palabra hija "<< nuevoNodo -> getPalabra()<< " se la vincula con palabra padre "<< siguiente -> getPalabra()<<endl;
+		}
+	} 
+	else{
+		nuevoNodo -> setPadre(NULL); //Si es el primer nodo ingresado se deja como padre NULL, indicando que es raiz	
+	}
+		heapIncompleto -> encolar(nuevoNodo);
+		
+	//Se revisa que se cumpla la condicion de heap
+	
+	//Cola<int>* c = new Cola<>();
+	//cout<< "Armando heap con palabra: "<< palabra << endl;
+	
  /*nodoPalabra *padre;
  nodoPalabra *hijos[n];
  
