@@ -8,12 +8,12 @@
 
 
 using namespace std;
-//string palabras[TAMANIO]; //aca se copian los valores leidos del txt 
 
 //VARIABLES GLOBALES
 int comp;//cantidad de comparaciones
 int N; //orden del monticulo
-//typedef string Palabra;
+
+
 //CLASE NODO
 //Clase secundaria para definir la lista
 template <class T> class Nodo { 
@@ -163,10 +163,6 @@ template <class T> class Pila:public Lista<T>{
 };                  
 
 
-//void inserta(struct nodo*insercion,struct nodo*elemento);
-//void imprime(struct nodo *p);
-//void borra(struct nodo *p);*/
-
 //CLASE NODO PALABRA
 //es el tipo de nodo que va formando la heap
 
@@ -174,7 +170,6 @@ class NodoPal {
 	private:
     	string palabra;
     	NodoPal* padre;
-    	//NodoPal* hijos[];
     	int repetidas;
     	Lista<NodoPal*>* hijos;
     	Cola<int>* colaNodo;
@@ -187,15 +182,9 @@ class NodoPal {
 			repetidas = 0;
 			hijos = new Lista<NodoPal*>(); //Los hijos se van agregando a la lista a medida que son conocidos
 			colaNodo = new Cola<int>();
-			for(int i=0; i<N; i++){
-				//hijos[i] = NULL;
-				//hijos ->agregar(NULL); 
-				//cout<<i<<endl;
-				colaNodo -> encolar(i); //Arma una cola con la cantidad de hijos "disponibles" para enlazar
-			}
+			for(int i=0; i<N; i++){ colaNodo -> encolar(i);} //Arma una cola con la cantidad de hijos "disponibles" para enlazar
 		};
 	//Setters
-	    //void set_dato(T a) { dato = a; };
 	    void setPadre(NodoPal* p) { padre = p; };
 	    void setHijo(NodoPal* h) {
 			hijos -> agregar(h);
@@ -208,7 +197,6 @@ class NodoPal {
 	    int getRepetidas(){ return repetidas;}
 	    NodoPal* getPadre() { return padre; };
 	    NodoPal* getHijo(int i){return buscarHijo(hijos, i);}; 
-	    //NodoPal* getHijo(int i){return hijos[i];}
 	//Otras funciones
 	    bool tieneLugar() { return !colaNodo -> colaVacia(); }
 	    bool tienePadre(){return !(padre==NULL);};
@@ -218,9 +206,7 @@ class NodoPal {
 
 NodoPal* NodoPal::buscarHijo(Lista<NodoPal*>* aux, int i){
 	if(aux != NULL){
-		//cout<<"F"<< aux -> tamanio() <<endl;
-			if(i<0 || i>=N || i>= aux -> tamanio()){
-		//cout<< "No existe el hijo "<< i<<endl;
+		if(i<0 || i>=N || i>= aux -> tamanio()){
 		return NULL;	
 	} 
 	else if(i== 0){ return aux -> ultimo();} //Devolver hijo mas a la izquierda(primero agregado)
@@ -233,19 +219,14 @@ NodoPal* NodoPal::buscarHijo(Lista<NodoPal*>* aux, int i){
 
 NodoPal* NodoPal:: getMayorHijo(){
 	NodoPal* mayor = getHijo(0);
-	/*if(hijos -> tamanio()==1){
-		mayor = hijos -> cabeza();
-	}
-	else{*/
+	NodoPal* temp;
 	if(mayor != NULL) {
 		for(int i = N; i>=1; i--){
-			if(getHijo(i) != NULL && (getHijo(i) -> getPalabra()> mayor -> getPalabra())) mayor = getHijo(i);
-			//else{cout<<"Hijo "<<i<<" null";}
+			temp = getHijo(i);
+			if(temp != NULL && (temp -> getPalabra() > mayor -> getPalabra())) {
+				mayor = temp;
+			}
 		}
-	//}
-	//buscarHijo(hijos, 0);	
-		//cout<<"mayor "<<mayor<<endl;
-		//cout<<"MAYOR "<<mayor<<endl;
 		return mayor;
 	}
 	else return NULL; 
@@ -257,21 +238,6 @@ void NodoPal:: borrarHijo(){
 	}
 }
 
-/*struct nodoPalabra{
-       palabra dato;
-       int contador; // 
-       nodoPalabra *padre;
-       nodoPalabra* hijos[TAMANIO];//se define un arreglo de nodos de 1000
-       int indice;//para ubicar nodo en la cola 
-};*/
-//typedef nodoPalabra * pnodo;
-/*struct nodo
-{
-  string nombre;
-  int contador;
-  struct nodo *izq,*der,*padre; //hay q implementar para n links
-};*/
-
 //DECLARACION DE FUNCIONES 
 Cola<string>* leerTxt();
 void preguntarN();
@@ -280,18 +246,13 @@ void armarHeap(string palabra);
 void escribirHeapOrdenada();
 void imprimirHeap(NodoPal* raiz, int n);
 
-//void crearCola(nodoPalabra *&padre *&hijos[]);
-
-
-
 //CLASE PRINCIPAL
-
 Cola<NodoPal*>* heapIncompleto = new Cola<NodoPal*>();//Cola auxiliar para construir la heap
-//Cola<NodoPal*>* heapCompleto = new Cola<NodoPal*>();
 Lista<NodoPal*>* heapCompleto = new Lista<NodoPal*>(); //Lista que contendra la heap una vez creada
-//Pila<NodoPal*>* pilaOrdenada = new Pila<NodoPal*>(); //Pila que contendra los datos ordenados
 Pila<string>* pilaOrdenada = new Pila<string>(); //Pila que contendra los datos ordenados
 
+//Cola<NodoPal*>* heapCompleto = new Cola<NodoPal*>();
+//Pila<NodoPal*>* pilaOrdenada = new Pila<NodoPal*>(); //Pila que contendra los datos ordenados
 
 int main(){
 	preguntarN();
@@ -305,7 +266,6 @@ int main(){
 	}
 	//Si despues de agregar todas las palabras, quedaron nodos sin hijos asignados, 
 	//se los agrega a heapCompleto para que- queden todos los nodos en un solo heap
-	
 	heapIncompleto -> desencolar();
 	while(!heapIncompleto -> colaVacia()){ 
 		//cout<< "Se agrega palabra sin hijos a heap completo: "<< heapIncompleto -> prox() -> getPalabra() <<endl;//dps borrar, solo para chequear
@@ -315,16 +275,14 @@ int main(){
 	}
 	
 	//imprimirHeap(heapCompleto -> ultimo(), 0);
-	
-	//cout<<"a ver \n"<<endl;
 	//heapCompleto -> imprimirLista(0);
 	
 	//Ordenar heap
 	while(!heapCompleto -> listaVacia()){
 		escribirHeapOrdenada();
 	}
+	//heapIncompleto -> imprimirCola(); //Debe quedar vacio
 	/*string f = heapCompleto -> cabeza()-> getPalabra();
-	cout<<"Volvi al main"<<endl;
 	pilaOrdenada -> apilar(f);*/
 	
 	cout<<"Palabras del archivo ordenadas alfabeticamente: "<< endl;
@@ -336,78 +294,7 @@ int main(){
 	cout << p -> tamanio();*/
 	
 	cout<<"Cantidad de comparaciones: "<<comp;
-	//heapIncompleto -> imprimirCola(); //Debe quedar vacio
 	//heapCompleto -> imprimirCola();
-  	//struct nodo *raiz,*temp;
-  	//raiz=NULL;
-  	//int numeroDeHijos;
-  	//string palabras[TAMANIO];
-  
-
-	//numeroDeHijos= preguntarN();
-	
-	//cout<<"el numero de n sera:"<<N;
-	//testImprimirPalabras();
-
-  /*printf("Teclea nombres, seguido por un caracter no numerico\n");
-  do{   
-    gets(name);
-    getchar();
-    {
-      temp=(struct nodo*)malloc(sizeof(struct nodo));
-      temp->der=NULL;
-      temp->izq=NULL;
-      strcpy(temp->nombre,name);
-      if(raiz==NULL)
-      {
-        raiz=temp;
-      }
-      else
-      {
-        inserta(raiz,temp);
-      }
-    }
-  }
-
-  printf("Listo\n");
-  printf("Nombres impresos en orden\n");
-  imprime(raiz);
-  borra(raiz);
-}
-
-void inserta(struct nodo*insercion, struct nodo*elemento)
-{
-  struct nodo*avanza,*nuevo;
-
-  avanza=insercion;
-
-  if(avanza!=NULL)
-  {
-    if(strcmp(elemento->nombre,avanza->nombre)>0)
-    {
-      if(avanza->der!=NULL)
-      {
-        inserta(avanza->der,elemento);
-      }
-      else
-      {
-        avanza->der=elemento;
-        return;
-      }
-    }
-    if(strcmp(elemento->nombre,avanza->nombre)<=0)
-    {
-      if(avanza->izq!=NULL)
-      {
-        inserta(avanza->izq,elemento);
-      }
-      else
-      {
-        avanza->izq=elemento;
-        return;
-      }
-    }
-  }*/
 }
 
 //FUNCION LECTOR DE TEXTO
@@ -424,38 +311,21 @@ Cola<string>* leerTxt(){
 		exit(1);
 	}
 	
-	//int i=0;
 	while (archivo >> linea) {
-        // pasamos las palabras del archivo hacia el arreglo palabras habria que pasarlos a una cola de string
-        //palabras[i]=linea;
-        c -> encolar(linea);
-        //c->imprimirCola();
+        c -> encolar(linea); //Se van encolando las palabras del archivo
     }
     return c;
     archivo.close();
-    //return palabras[string];
 }
-
-
-/*void testImprimirPalabras(){
-	//palabras[1000]="vacio LPM";
-	for(int i=0;i<TAMANIO;i++)
-	{
-		//cout<<palabras[i]<<endl;
-	}
-}*/
 
 void preguntarN(){
  //solicita ingresar el numero de hijos y comprueba si la rta es correcta (chequear porque no funciona cuando no es un num)
-  //N=-1;
   	cout <<"Ingrese el orden del monticulo: ";
 	cin >> N;
   	while(N <=0) {
   		cout <<"El valor ingresado no es un numero natural. Ingrese el orden del monticulo: ";
 		cin >> N;
 	}
-  	//cout <<"Se usara un monticulo de orden "<< N<<endl;
-	//return ;*/
 }
 
 void armarHeap(string palabra){
@@ -498,43 +368,7 @@ void armarHeap(string palabra){
 			}
 		}
 	} 
-	
-	//cout<< "A la palabra hija "<< palabra << " se la vincula con palabra padre "<< palabraPadre <<endl;
-		
-	
-	
-					
-	/*if(nuevoNodo ->getPalabra() > siguiente ->getPalabra()){
-		cout<<"se esta intentando ordenar";
-		buscaPadre= nodoPadre;
-		while(buscaPadre -> tienePadre()){
-			string temp = nuevoNodo ->getPalabra();
-			nuevoNodo ->getPalabra()= buscaPadre ->getPalabra();
-			buscaPadre ->setPalabra(temp);	
-		}
-							
-	}*/
-	//Cola<int>* c = new Cola<>();
-	//cout<< "Armando heap con palabra: "<< palabra << endl;
-	
- /*nodoPalabra *padre;
- nodoPalabra *hijos[n];
- 
- 
- for(int i=0 ; i<TAMANIO;i++)
- {
- nodoPalabra *nuevaPalabra = new (nodoPalabra);
- nuevaPalabra->dato=palabras[i];
- //if(false)*/
-  
-  
- 
- //crearCola(nodoPalabra *&padre *&hijos[])	
- //	nodoPalabra heap
 }
-
-//void ordenarHeap(){}
-
 
 void escribirHeapOrdenada(){
 	if(heapCompleto -> tamanio() == 2) {
