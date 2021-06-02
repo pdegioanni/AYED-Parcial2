@@ -211,7 +211,6 @@ class NodoPal {
 };
 
 NodoPal* NodoPal::buscarHijo(Lista<NodoPal*>* aux, int i){
-	//cout<<"Buscando hijo "<< i<<endl;
 	if(aux != NULL){
 			if(i<0 || i>=N || i>= aux -> tamanio()){
 		//cout<< "No existe el hijo "<< i<<endl;
@@ -282,6 +281,7 @@ int main(){
 	}
 	
 	imprimirHeap(heapCompleto -> prox(), 0);
+	cout<<"Cantidad de comparaciones: "<<comp;
 	
 	//heapIncompleto -> imprimirCola(); //Debe quedar vacio
 	//heapCompleto -> imprimirCola();
@@ -406,40 +406,26 @@ void preguntarN(){
   	//cout <<"Se usara un monticulo de orden "<< N<<endl;
 	//return ;*/
 }
-/*
-
-class arbol{
-	/*
-    pnodo raiz;
-    void Insert(int x, bool &aumento, nodoPalabra* &A);
-    void show(pnodo aux, int n);
-    void recorerIRD(nodoPalabra* &A);
-
-    
-public:
-    arbol(){raiz=NULL;};
-    ~arbol(){};
-    void CreaArbol(palabra x);
-    void VerArbol(){ show(raiz,0); }
-};*/
-
 
 void armarHeap(string palabra ){
 	NodoPal* nuevoNodo = new NodoPal(palabra);
 	NodoPal* nodoPadre;
-	//NodoPal* buscaPadre;
 	string palabraPadre;
 	
 	//Se agrega el nodo a la estructura, vinculandolo al nodo padre que corresponda en orden
-	if(!heapIncompleto -> colaVacia()){ //Si no es el primer nodo agregado
+	if(heapIncompleto -> colaVacia()){ //Si es el primer nodo ingresado se deja como padre NULL, indicando que es raiz	
+		nuevoNodo -> setPadre(NULL); 
+		heapIncompleto -> encolar(nuevoNodo);
+	} 
+	else{ //Si no es el primer nodo agregado
+		heapIncompleto -> encolar(nuevoNodo);
 		nodoPadre = heapIncompleto -> prox(); //Se toma el siguiente nodo que todavia no tiene sus hijos seteados
 		
 		if(!(nodoPadre -> tieneLugar())){ // Si siguiente no tiene mas lugar para agregar un hijo,
 			heapCompleto -> encolar(nodoPadre); // se agrega a la cola de nodos con todos sus hijos completos
 			heapIncompleto -> desencolar();  //Se elimina de la cola de nodos con hijos disponibles 
-			nodoPadre = heapIncompleto -> prox(); // Se toma el siguiente en la cola y se agrega el nuevo nodo como hijo	
+			nodoPadre = heapIncompleto -> prox(); // Se toma el siguiente en la cola	
 		}
-		//cout<< nodoPadre -> getPalabra()<<endl;
 		
 		//Se agrega nuevo nodo como hijo del primer nodo en la cola que "tenga lugar"
 		nuevoNodo -> setPadre(nodoPadre);
@@ -447,29 +433,20 @@ void armarHeap(string palabra ){
 		palabraPadre = nodoPadre -> getPalabra();
 		
 		comp ++;
-	
-		//Se revisa que se cumpla la condicion de heap	
-		if(palabra > palabraPadre){ //Si la palabra agregada es mayor, se intercambia con el padre
-			nuevoNodo -> setPalabra(nodoPadre -> getPalabra());
-			nodoPadre -> setPalabra(nuevoNodo -> getPalabra());
-			
-			while(nodoPadre -> tienePadre()){
-				//cout<<nodoPadre -> getPalabra()<<endl;
-				cout<<"palabra "<< palabra << " mayor a "<< palabraPadre<<endl;
-				if(palabra > palabraPadre){
-					nuevoNodo -> setPalabra(palabraPadre);
-					nodoPadre -> setPalabra(palabra);	
-					//Recalcula el nodo padre
-					nuevoNodo = nodoPadre;
-					nodoPadre = nodoPadre -> getPadre();
-					palabraPadre = nodoPadre -> getPalabra();
-				}
-				else break; 
+		while(palabra > palabraPadre && nuevoNodo -> tienePadre()){
+			comp ++;
+			nuevoNodo -> setPalabra(palabraPadre);
+			nodoPadre -> setPalabra(palabra);	
+			//Recalcula el nodo padre
+			nuevoNodo = nodoPadre;
+			if(nuevoNodo -> getPadre() == NULL) break;
+			else {
+				nodoPadre = nuevoNodo -> getPadre();
+				palabraPadre = nodoPadre -> getPalabra();
 			}
 		}
 	} 
-	else{ nuevoNodo -> setPadre(NULL); } //Si es el primer nodo ingresado se deja como padre NULL, indicando que es raiz	
-	heapIncompleto -> encolar(nuevoNodo);
+	
 	//cout<< "A la palabra hija "<< palabra << " se la vincula con palabra padre "<< palabraPadre <<endl;
 		
 	
