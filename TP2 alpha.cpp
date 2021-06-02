@@ -245,7 +245,7 @@ void preguntarN();
 void armarHeap(string palabra);
 void escribirHeapOrdenada();
 void imprimirHeap(NodoPal* raiz, int n);
-void escribirArchivo(Pila<string>* pilaOrdenada);
+void escribirArchivo();
 
 //DECLARACION DE ESTRUCTURAS AUXILIARES PARA ORDENAR
 Cola<NodoPal*>* heapIncompleto = new Cola<NodoPal*>();//Cola auxiliar para construir la heap
@@ -255,12 +255,14 @@ Pila<string>* pilaOrdenada = new Pila<string>(); //Pila que contendra los datos 
 
 //CLASE PRINCIPAL
 int main(){
+	//Primera Parte: procesamiento del archivo de entrada
 	preguntarN();
 	Cola<string>* colaPalabras = leerTxt(); //Carga el archivo y genera una cola con las palabras a ordenar
 	/*cout<<"Palabras del archivo sin ordenar:\n" <<endl;
 	colaPalabras -> imprimirCola();
 	cout<< "--------------------------------------------"<<endl<<endl;*/
 	
+	//Segunda parte: armado de la heap
 	while(!(colaPalabras -> colaVacia())){
 		armarHeap(colaPalabras -> prox());
 		colaPalabras -> desencolar();
@@ -274,26 +276,27 @@ int main(){
 	}
 	
 	//Imprime heap en consola (solo para heap binario)
-	imprimirHeap(heapCompleto -> ultimo(), 0);
+	//imprimirHeap(heapCompleto -> ultimo(), 0);
 	
-	//Ordenar heap
+	//Tercera parte: Armar pila ordenada de palabras en base al sorting de la heap
 	while(!heapCompleto -> listaVacia()){
 		escribirHeapOrdenada();
 	}
 	//heapIncompleto -> imprimirCola(); //Debe quedar vacio
 	
-	//Imprimir resultados y generar archivo de salida
-	escribirArchivo(pilaOrdenada);
+	//Cuarta parte: Imprimir resultados y generar archivo de salida
+	escribirArchivo();
 }
 
 //FUNCION LECTOR DE ARCHIVO
 Cola<string>* leerTxt(){
 	Cola<string> *c = new Cola<string>();
-  	
-	string linea;
+	
 	ifstream archivo;
-	archivo.open("milpalabras.txt");
-	//archivo.open("letrasabecedario.txt");
+  	string linea;
+	//archivo.open("palabras.txt");
+	//archivo.open("abecedario.txt");
+	archivo.open("texto.txt");
 	
 	if(!archivo){
 		cout<< "No se puede abrir el archivo"<<endl;
@@ -406,8 +409,8 @@ void escribirHeapOrdenada(){
 			}
 		}
 		//Paso a paso en consola (para heap binario)
-			cout<<endl<<"----------------------------------"<<endl;
-			imprimirHeap(heapCompleto -> ultimo(), 0);
+		/*	cout<<endl<<"----------------------------------"<<endl;
+			imprimirHeap(heapCompleto -> ultimo(), 0);*/
 	}
 	
 }
@@ -430,7 +433,7 @@ void imprimirHeap(NodoPal* raiz, int n){
 
 //FUNCION ESCRIBIR ARCHIVO DE TEXTO
 //Imprime los datos de la cola en un archivo de texto
-void escribirArchivo(Pila<string>* pilaOrdenada){
+void escribirArchivo(){
 	cout<<"\n\n-------------------- Resultados ---------------------------- "<< endl;
 	cout<<"Palabras del archivo ordenadas alfabeticamente: "<< endl;
 	pilaOrdenada -> imprimirPila(); //Imprime salida en consola para pruebas
