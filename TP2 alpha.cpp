@@ -263,11 +263,13 @@ void testImprimirPalabras();
 void armarHeap(string palabra);
 void escribirHeapOrdenada();
 void imprimirHeap(NodoPal* raiz, int n);
+void escribirArchivo(Pila<string>* pilaOrdenada);
 
 //CLASE PRINCIPAL
 Cola<NodoPal*>* heapIncompleto = new Cola<NodoPal*>();//Cola auxiliar para construir la heap
 Lista<NodoPal*>* heapCompleto = new Lista<NodoPal*>(); //Lista que contendra la heap una vez creada
 Pila<string>* pilaOrdenada = new Pila<string>(); //Pila que contendra los datos ordenados
+//Pila<int>* pilaRepetidas = new Pila<int>(); //Pila con la cantidad de repeticiones de cada palabra
 
 int main(){
 	preguntarN();
@@ -301,15 +303,16 @@ int main(){
 	/*string f = heapCompleto -> cabeza()-> getPalabra();
 	pilaOrdenada -> apilar(f);*/
 	
-	cout<<"Palabras del archivo ordenadas alfabeticamente: "<< endl;
 	
-	pilaOrdenada -> imprimirPila();
+	
+	//pilaOrdenada -> imprimirPila();
 	/*Pila<string>* p = new Pila<string>();
 	p -> apilar("w");
 	//p -> apilar("c");
 	cout << p -> tamanio();*/
 	
-	cout<<"Cantidad de comparaciones: "<<comp<<endl;
+	escribirArchivo(pilaOrdenada);
+	
 	//heapCompleto -> imprimirCola();
 	
 	/*NodoPal* prueba = new NodoPal("palabra");
@@ -415,6 +418,7 @@ void escribirHeapOrdenada(){
 		//cout<<"valor de raiz "<<heapCompleto -> ultimo() -> getPalabra()<<endl;
 		NodoPal* nodoRaiz = heapCompleto -> ultimo();
 		pilaOrdenada -> apilar(nodoRaiz-> getPalabra());//Agrega a la pila el valor de la raiz
+		//pilaRepeticiones -> apilar(nodoRaiz -> getRepetidas());
 		
 		string ultimaPalabra = heapCompleto -> cabeza() -> getPalabra();
 		cout<<"ultima palabra: "<< ultimaPalabra<<endl;
@@ -464,3 +468,40 @@ void imprimirHeap(NodoPal* raiz, int n){ //Por ahora solo sirve para heap binari
 		imprimirHeap(hijoIzq, n+1);
 	}
 };
+
+//funcion que imprime los datos de la cola en un archivo de texto
+void escribirArchivo(Pila<string>* pilaOrdenada){
+	cout<<"Palabras del archivo ordenadas alfabeticamente: "<< endl;
+	pilaOrdenada -> imprimirPila(); //Imprime salida en consola para pruebas
+	ofstream archivoOrdenado;//se declara el archivo
+	archivoOrdenado.open("SalidaOrdenada.txt",ios::out); //crea archivo de texto y le asigna la funcion de escribir
+	
+	if(archivoOrdenado.fail()){
+		cout<<"No se pudo abrir el archivo para escribir.";
+		exit(1);
+	}
+	//Se "imprimen" los datos recibidos de pilaOrdenada en el archivo creado
+	string palabra = pilaOrdenada -> tope();
+	pilaOrdenada ->desapilar();
+	
+	string siguiente;
+	int repeticiones = 0;
+	
+	while(!pilaOrdenada->pilaVacia()){
+		siguiente = pilaOrdenada -> tope();
+		while(siguiente == palabra){
+			repeticiones ++;
+			pilaOrdenada ->desapilar();
+			if(!pilaOrdenada -> pilaVacia()) siguiente = pilaOrdenada -> tope();
+			else break;
+		}
+		archivoOrdenado<< palabra << " - "<< repeticiones << " repeticiones"<<endl;
+		palabra = siguiente;
+		repeticiones = 0;
+		pilaOrdenada ->desapilar();
+	}
+	
+	cout<<"Cantidad de comparaciones: "<<comp<<endl;
+	archivoOrdenado<<endl<< "Cantidad de comparaciones: "<<comp<<endl;
+		archivoOrdenado.close();
+}
