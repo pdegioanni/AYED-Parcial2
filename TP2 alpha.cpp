@@ -13,7 +13,6 @@ using namespace std;
 int comp;//cantidad de comparaciones
 int N; //orden del monticulo
 
-
 //CLASE NODO
 //Clase secundaria para definir la lista
 template <class T> class Nodo { 
@@ -205,16 +204,35 @@ class NodoPal {
 };
 
 NodoPal* NodoPal::buscarHijo(Lista<NodoPal*>* aux, int i){
+	//cout<<"i =  "<< i<<endl;
+	//cout<<" Cabeza "<< aux -> cabeza() -> getPalabra()<<endl;
+	//cout<<" Cola "<< aux -> ultimo() -> getPalabra()<<endl;
+	//cout<<"Tamanio "<< aux -> tamanio()<<endl;
 	if(aux != NULL){
-		if(i<0 || i>=N || i>= aux -> tamanio()){
-		return NULL;	
-	} 
-	else if(i== 0){ return aux -> ultimo();} //Devolver hijo mas a la izquierda(primero agregado)
-	else if(i == N-1){
-		return aux -> cabeza(); //Devolver hijo mas a la derecha (ultimo agregado)
-	} 
-	else return buscarHijo(aux -> resto(), i+1);
+		//cout<<"Auxiliar distinto de null"<<endl;
+		if(i<0 || i>=N ){
+			//i>= aux -> tamanio()
+			//cout<<"No hay hijo"<<endl;
+			return NULL;
+		}
+		else if(i== 0){ 
+			//cout<<"Devolviendo ultimo"<<endl;
+			return aux -> ultimo();
+		} //Devolver hijo mas a la izquierda(primero agregado)
+		else if(i == N-1){
+			//cout<<"Devolviendo cabeza"<<endl;
+			return aux -> cabeza(); //Devolver hijo mas a la derecha (ultimo agregado)
+		} 
+	//} 
+	//else{
+		//cout<<"Buscando en lo que sigue "<<endl;
+		//aux = aux ->resto();
+		//cout<<"Nuevo tamanio de aux "<< aux -> tamanio();
+		//cout<<"Nuevo i =  "<< i<<endl;
+		//i--;
+		return buscarHijo(aux -> resto(), i+1);
 	}
+	else return NULL; 
 }
 
 NodoPal* NodoPal:: getMayorHijo(){
@@ -251,22 +269,20 @@ Cola<NodoPal*>* heapIncompleto = new Cola<NodoPal*>();//Cola auxiliar para const
 Lista<NodoPal*>* heapCompleto = new Lista<NodoPal*>(); //Lista que contendra la heap una vez creada
 Pila<string>* pilaOrdenada = new Pila<string>(); //Pila que contendra los datos ordenados
 
-//Cola<NodoPal*>* heapCompleto = new Cola<NodoPal*>();
-//Pila<NodoPal*>* pilaOrdenada = new Pila<NodoPal*>(); //Pila que contendra los datos ordenados
-
 int main(){
 	preguntarN();
 	Cola<string>* colaPalabras = leerTxt(); //Carga el archivo y genera una cola con las palabras a ordenar
 	/*cout<<"Palabras del archivo sin ordenar:\n" <<endl;
 	colaPalabras -> imprimirCola();
 	cout<< "--------------------------------------------"<<endl<<endl;*/
+	
 	while(!(colaPalabras -> colaVacia())){
 		armarHeap(colaPalabras -> prox());
 		colaPalabras -> desencolar();
 	}
 	//Si despues de agregar todas las palabras, quedaron nodos sin hijos asignados, 
 	//se los agrega a heapCompleto para que- queden todos los nodos en un solo heap
-	heapIncompleto -> desencolar();
+	//heapIncompleto -> desencolar();
 	while(!heapIncompleto -> colaVacia()){ 
 		//cout<< "Se agrega palabra sin hijos a heap completo: "<< heapIncompleto -> prox() -> getPalabra() <<endl;//dps borrar, solo para chequear
 		//heapCompleto -> encolar(heapIncompleto -> prox());
@@ -274,7 +290,7 @@ int main(){
 		heapIncompleto -> desencolar();
 	}
 	
-	//imprimirHeap(heapCompleto -> ultimo(), 0);
+	imprimirHeap(heapCompleto -> ultimo(), 0);
 	//heapCompleto -> imprimirLista(0);
 	
 	//Ordenar heap
@@ -293,8 +309,25 @@ int main(){
 	//p -> apilar("c");
 	cout << p -> tamanio();*/
 	
-	cout<<"Cantidad de comparaciones: "<<comp;
+	cout<<"Cantidad de comparaciones: "<<comp<<endl;
 	//heapCompleto -> imprimirCola();
+	
+	/*NodoPal* prueba = new NodoPal("palabra");
+	NodoPal* hijo0 = new NodoPal("Hijo 0");
+	prueba ->setHijo(hijo0);
+	NodoPal* hijo1 = new NodoPal("Hijo 1");
+	prueba ->setHijo(hijo1);
+	NodoPal* hijo2 = new NodoPal("Hijo 2");
+	prueba ->setHijo(hijo2);
+	NodoPal* hijo3 = new NodoPal("Hijo 3");
+	prueba ->setHijo(hijo3);
+	NodoPal* hijo4 = new NodoPal("Hijo 4");
+	prueba ->setHijo(hijo4);
+	cout<< prueba -> getPalabra();
+	for(int i= 0; i<5; i++){
+		cout<< prueba -> getHijo(i) -> getPalabra()<<endl;
+	}*/
+	
 }
 
 //FUNCION LECTOR DE TEXTO
@@ -384,16 +417,20 @@ void escribirHeapOrdenada(){
 		pilaOrdenada -> apilar(nodoRaiz-> getPalabra());//Agrega a la pila el valor de la raiz
 		
 		string ultimaPalabra = heapCompleto -> cabeza() -> getPalabra();
+		cout<<"ultima palabra: "<< ultimaPalabra<<endl;
 		nodoRaiz -> setPalabra(ultimaPalabra); //Carga en la primera posicion el valor del ultimo nodo
 		
 		//Elimiina el ultimo dato de la heap (cabeza de la lista)
 		
 		//else pilaOrdenada -> apilar(heapCompleto -> ultimo() -> getPalabra());
+		if(heapCompleto -> cabeza() -> tienePadre()){
+			heapCompleto -> cabeza() -> getPadre() -> borrarHijo();//Se elimina el link con el nodo padre
+		}
 		heapCompleto -> borrar();
 		
 		NodoPal * mayorHijo = nodoRaiz -> getMayorHijo();
-		//cout<<"Hijo mayor "<< mayorHijo <<endl; 
 		string palabraHijo = mayorHijo -> getPalabra();
+		cout<<"Hijo mayor "<< palabraHijo <<endl; 
 		
 		comp ++;
 		while(palabraHijo > ultimaPalabra && nodoRaiz -> getMayorHijo()!= NULL){
@@ -408,23 +445,22 @@ void escribirHeapOrdenada(){
 				palabraHijo = mayorHijo -> getPalabra();
 			}
 		}
-		//cout<<"vuelta ----------------------------"<<endl;
-		//imprimirHeap(heapCompleto -> ultimo(), 0);
-		if(heapCompleto -> cabeza() -> tienePadre()){
-			heapCompleto -> cabeza() -> getPadre() -> borrarHijo();//Se elimina el link con el nodo padre
-		}
+		cout<<"vuelta ----------------------------"<<endl;
+		imprimirHeap(heapCompleto -> ultimo(), 0);
 		//if(heapCompleto -> tamanio()==1) cout<<"ultimo";
 	}
 	
 }
 
 void imprimirHeap(NodoPal* raiz, int n){ //Por ahora solo sirve para heap binario
+	NodoPal* hijoDer;
+	NodoPal* hijoIzq;
 	if(raiz != NULL){
-		imprimirHeap(raiz -> getHijo(N-1), n+1);
+		hijoDer = raiz -> getHijo(N-1);
+		hijoIzq = raiz -> getHijo(0);
+		if(hijoDer  != hijoIzq) imprimirHeap(hijoDer, n+1);
 		for(int i=1; i<=n; i++) cout<<"       ";
 		cout<< raiz -> getPalabra()<<endl;
-		imprimirHeap(raiz -> getHijo(0), n+1);
+		imprimirHeap(hijoIzq, n+1);
 	}
 };
-
-
