@@ -46,6 +46,7 @@ public:
     T cabeza(void);
 	T ultimo(void);
     Lista* resto(void);
+    int tamanio();
     void borrar(void); //borra la cabeza
     void borrarUltimo();//borra el ultimo
     void imprimirLista(int sentido);
@@ -77,6 +78,16 @@ template <class T> Lista<T>* Lista<T>::resto(void){
     Lista* l = new Lista (czo->getNext()); //El czo de la lista actual tiene la dirección del segundo elemento
     return (l);
 }
+
+template <class T> int Lista<T>::tamanio(){
+	int i = 0;
+  	Lista* l = this;
+  	while(!l->listaVacia()){
+    	i++;
+    	l= l -> resto();
+    }
+  	return i;  
+  }
 
 template <class T> void Lista<T>::borrar(){
 	if(!this.listaVacia){
@@ -163,7 +174,8 @@ class NodoPal {
     	//NodoPal* hijos[];
     	int repetidas;
     	Lista<NodoPal*>* hijos;
-    	Cola<int>* colaNodo; 
+    	Cola<int>* colaNodo;
+		NodoPal* buscarHijo(Lista<NodoPal*>* aux, int i); 
 	public:
     //Constructores
 	    NodoPal(string p) { 
@@ -192,10 +204,29 @@ class NodoPal {
 	    string getPalabra() { return palabra; };
 	    int getRepetidas(){ return repetidas;}
 	    NodoPal* getPadre() { return padre; };
+	    NodoPal* getHijo(int i){return buscarHijo(hijos, i);}; 
 	    //NodoPal* getHijo(int i){return hijos[i];}
 	    bool tienePadre(){return !(padre==NULL);};
 	    bool tieneLugar() { return !colaNodo -> colaVacia(); }
 };
+
+NodoPal* NodoPal::buscarHijo(Lista<NodoPal*>* aux, int i){
+	//cout<<"Buscando hijo "<< i<<endl;
+	if(aux != NULL){
+			if(i<0 || i>=N || i>= aux -> tamanio()){
+		//cout<< "No existe el hijo "<< i<<endl;
+		return NULL;	
+	} 
+	else if(i== 0) return aux -> ultimo(); //Devolver hijo mas a la izquierda(primero agregado)
+	else if(i == N-1){
+		return aux -> cabeza(); //Devolver hijo mas a la derecha (ultimo agregado)
+	} 
+	else return buscarHijo(aux -> resto(), i+1);
+	}
+
+}
+
+
 /*struct nodoPalabra{
        palabra dato;
        int contador; // 
@@ -216,9 +247,8 @@ Cola<string>* leerTxt();
 void preguntarN();
 void testImprimirPalabras();
 void armarHeap(string palabra);
-void intercambiarPalabras(NodoPal* nuevoNodo, NodoPal* nodoPadre);
-void ordenarHeap();
 void escribirHeapOrdenada();
+void imprimirHeap(NodoPal* raiz, int n);
 
 //void crearCola(nodoPalabra *&padre *&hijos[]);
 
@@ -246,12 +276,14 @@ int main(){
 	
 	heapIncompleto -> desencolar();
 	while(!heapIncompleto -> colaVacia()){ 
-		cout<< "Se agrega palabra sin hijos a heap completo: "<< heapIncompleto -> prox() -> getPalabra() <<endl;//dps borrar, solo para chequear
+		//cout<< "Se agrega palabra sin hijos a heap completo: "<< heapIncompleto -> prox() -> getPalabra() <<endl;//dps borrar, solo para chequear
 		heapCompleto -> encolar(heapIncompleto -> prox());
 		heapIncompleto -> desencolar();
 	}
 	
-	heapIncompleto -> imprimirCola(); //Debe quedar vacio
+	imprimirHeap(heapCompleto -> prox(), 0);
+	
+	//heapIncompleto -> imprimirCola(); //Debe quedar vacio
 	//heapCompleto -> imprimirCola();
   	//struct nodo *raiz,*temp;
   	//raiz=NULL;
@@ -472,10 +504,36 @@ void armarHeap(string palabra ){
  //	nodoPalabra heap
 }
 
-void ordenarHeap(){}
+//void ordenarHeap(){}
 
 
-void escribirHeapOrdenada(){}
+void escribirHeapOrdenada(){
+/*	Pila<NodoPal*>* pilaOrdenada = newPila<NodoPal*>();
+	pilaOrdenada -> apilar(heapCompleto -> prox());
+	
+	string ultimaPalabra = heapCompleto -> ult();
+	heapCompleto -> prox() -> setPalabra(ultimaPalabra);*/
+}
+
+void imprimirHeap(NodoPal* raiz, int n){ //Por ahora solo sirve para heap binario
+	if(raiz != NULL){
+		imprimirHeap(raiz -> getHijo(N-1), n+1);
+		for(int i=1; i<=n; i++) cout<<"       ";
+		cout<< raiz -> getPalabra()<<endl;
+		imprimirHeap(raiz -> getHijo(0), n+1);
+	}
+	//else cout<<"";
+	
+	/*void arbolAVL::show(pnodo aux, int n) 
+   	if(raiz != NULL){         
+       show (raiz -> der, n+1);
+       for(i=1; i<=n; i++) cout<<"        ";
+       cout<<"("<<aux->dato<<" "<<aux->FB<<")"<<"\n";
+       show(aux->izq, n+1);
+   }*/
+
+};
+
 
 /*void crearCola(nodoPalabra *&padre*&hijos)
 {
